@@ -45,6 +45,7 @@ fun BookListScreen(volumeId: String, onBack: () -> Unit, onBookClick: (String) -
                 items(volume.books) { book ->
                     ListItem(
                         headlineContent = { Text(book.name) },
+                        supportingContent = { Text("${book.chapters.size} chapters") },
                         modifier = Modifier.clickable { onBookClick(book.id) }
                     )
                     HorizontalDivider()

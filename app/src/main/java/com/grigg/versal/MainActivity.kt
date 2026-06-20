@@ -47,9 +47,14 @@ fun MainScreen() {
             entry<Route.Home>(
                 metadata = ListDetailSceneStrategy.listPane()
             ) {
-                VolumeListScreen(onVolumeClick = { volumeId ->
-                    backStack.add(Route.Books(volumeId))
-                })
+                VolumeListScreen(
+                    onVolumeClick = { volumeId ->
+                        backStack.add(Route.Books(volumeId))
+                    },
+                    onBookClick = { volumeId, bookId ->
+                        backStack.add(Route.Chapters(volumeId, bookId))
+                    }
+                )
             }
             entry<Route.Books>(
                 metadata = ListDetailSceneStrategy.listPane()
