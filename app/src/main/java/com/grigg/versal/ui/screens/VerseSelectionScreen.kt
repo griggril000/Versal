@@ -1,5 +1,6 @@
 package com.grigg.versal.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,8 +12,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,26 +29,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.grigg.versal.data.ScriptureRepository
 import com.grigg.versal.model.VerseSelection
-import android.content.Intent
-import android.content.ClipData
-import android.widget.Toast
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, onBack: () -> Unit) {
     val context = LocalContext.current
-    val clipboard = LocalClipboard.current
-    val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
     val chapter = ScriptureRepository.getChapter(volumeId, bookId, chapterNumber)
     val book = ScriptureRepository.getBook(volumeId, bookId)
     val volume = ScriptureRepository.getVolume(volumeId)
@@ -77,14 +71,9 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
                                 chapterNumber = chapterNumber,
                                 selectedVerses = selectedVerses
                             )
-                            val link = selection.generateLink()
-                            val clipData = ClipData.newPlainText("Scripture Link", link)
-                            scope.launch {
-                                clipboard.setClipEntry(ClipEntry(clipData))
-                                Toast.makeText(context, "Link copied to clipboard", Toast.LENGTH_SHORT).show()
-                            }
+                            uriHandler.openUri(selection.generateLink())
                         }) {
-                            Icon(Icons.Default.ContentCopy, contentDescription = "Copy Link")
+                            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open Link")
                         }
                         IconButton(onClick = {
                             val selection = VerseSelection(
