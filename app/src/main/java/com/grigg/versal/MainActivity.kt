@@ -13,6 +13,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.grigg.versal.navigation.Route
+import com.grigg.versal.ui.screens.AboutScreen
 import com.grigg.versal.ui.screens.BookListScreen
 import com.grigg.versal.ui.screens.ChapterListScreen
 import com.grigg.versal.ui.screens.VerseSelectionScreen
@@ -53,8 +54,16 @@ fun MainScreen() {
                     },
                     onBookClick = { volumeId, bookId ->
                         backStack.add(Route.Chapters(volumeId, bookId))
+                    },
+                    onAboutClick = {
+                        backStack.add(Route.About)
                     }
                 )
+            }
+            entry<Route.About>(
+                metadata = ListDetailSceneStrategy.detailPane()
+            ) {
+                AboutScreen(onBack = { backStack.removeAt(backStack.size - 1) })
             }
             entry<Route.Books>(
                 metadata = ListDetailSceneStrategy.listPane()

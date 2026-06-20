@@ -16,4 +16,7 @@ sealed interface Route : NavKey {
 
     @Serializable
     data class Verses(val volumeId: String, val bookId: String, val chapterNumber: Int) : Route
+
+    @Serializable
+    data object About : Route
 }

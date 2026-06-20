@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,13 +33,24 @@ import com.grigg.versal.ui.theme.VersalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VolumeListScreen(onVolumeClick: (String) -> Unit, onBookClick: (String, String) -> Unit) {
+fun VolumeListScreen(
+    onVolumeClick: (String) -> Unit,
+    onBookClick: (String, String) -> Unit,
+    onAboutClick: () -> Unit
+) {
     var searchQuery by remember { mutableStateOf("") }
     val searchResults = ScriptureRepository.searchBooks(searchQuery)
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Scriptures") })
+            TopAppBar(
+                title = { Text("Scriptures") },
+                actions = {
+                    IconButton(onClick = onAboutClick) {
+                        Icon(Icons.Default.Info, contentDescription = "About")
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Column(
@@ -86,6 +99,6 @@ fun VolumeListScreen(onVolumeClick: (String) -> Unit, onBookClick: (String, Stri
 @Composable
 fun VolumeListScreenPreview() {
     VersalTheme {
-        VolumeListScreen(onVolumeClick = {}, onBookClick = { _, _ -> })
+        VolumeListScreen(onVolumeClick = {}, onBookClick = { _, _ -> }, onAboutClick = {})
     }
 }
