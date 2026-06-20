@@ -5,7 +5,17 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+import org.junit.Before
+import java.io.File
+
 class ScriptureRepositoryTest {
+
+    @Before
+    fun setup() {
+        val jsonFile = File("src/main/assets/data/scriptures.json")
+        val jsonString = jsonFile.readText()
+        ScriptureRepository.initWithJson(jsonString)
+    }
 
     @Test
     fun testVolumesCount() {

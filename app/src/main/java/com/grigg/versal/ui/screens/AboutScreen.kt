@@ -1,5 +1,6 @@
 package com.grigg.versal.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,11 +18,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(onBack: () -> Unit) {
+    val uriHandler = LocalUriHandler.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -67,6 +71,32 @@ fun AboutScreen(onBack: () -> Unit) {
                 text = "• Ben Crowder: Special thanks to Ben Crowder for the 'scriptures-json' repository. His work in converting the Standard Works into accessible formats is the foundation of this app's accuracy.",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 12.dp)
+            )
+            
+            Text(
+                text = "Visit bcbooks/scriptures-json on GitHub",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline
+                ),
+                modifier = Modifier
+                    .padding(top = 4.dp, start = 12.dp)
+                    .clickable {
+                        uriHandler.openUri("https://github.com/bcbooks/scriptures-json")
+                    }
+            )
+            
+            Text(
+                text = "Visit bencrowder.net",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline
+                ),
+                modifier = Modifier
+                    .padding(top = 8.dp, start = 12.dp)
+                    .clickable {
+                        uriHandler.openUri("https://bencrowder.net")
+                    }
             )
             
             Text(
