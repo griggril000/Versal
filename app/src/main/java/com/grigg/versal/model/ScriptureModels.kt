@@ -51,12 +51,12 @@ data class VerseSelection(
                 if (sortedVerses[i] == end + 1) {
                     end = sortedVerses[i]
                 } else {
-                    ranges.add(if (start == end) "$start" else "$start-$end")
+                    ranges.add(if (start == end) "p$start" else "p$start-p$end")
                     start = sortedVerses[i]
                     end = sortedVerses[i]
                 }
             }
-            ranges.add(if (start == end) "$start" else "$start-$end")
+            ranges.add(if (start == end) "p$start" else "p$start-p$end")
         }
 
         val idParam = ranges.joinToString(",")
