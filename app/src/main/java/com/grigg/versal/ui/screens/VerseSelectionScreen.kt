@@ -5,8 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -24,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,8 +37,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.grigg.versal.data.ScriptureRepository
 import com.grigg.versal.model.VerseSelection
 
@@ -46,6 +53,9 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
     val book = ScriptureRepository.getBook(volumeId, bookId)
     val volume = ScriptureRepository.getVolume(volumeId)
     
+    val adaptiveInfo = currentWindowAdaptiveInfoV2()
+    val isExpanded = adaptiveInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
+    
     var selectedVerses by remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
@@ -53,8 +63,10 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
             TopAppBar(
                 title = { Text("${book?.name} $chapterNumber") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    if (!isExpanded) {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
                     }
                 },
                 actions = {
@@ -99,40 +111,53 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
         }
     ) { paddingValues ->
         if (chapter != null) {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 64.dp),
-                contentPadding = PaddingValues(16.dp),
+            val layoutDirection = LocalLayoutDirection.current
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        bottom = paddingValues.calculateBottomPadding(),
+                        start = paddingValues.calculateStartPadding(layoutDirection),
+                        end = paddingValues.calculateEndPadding(layoutDirection)
+                    ),
+                contentAlignment = Alignment.TopCenter
             ) {
-                items(chapter.verses) { verse ->
-                    val isSelected = selectedVerses.contains(verse.number)
-                    Card(
-                        colors = if (isSelected) {
-                            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                        } else {
-                            CardDefaults.cardColors()
-                        },
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .aspectRatio(1f)
-                            .clickable {
-                                selectedVerses = if (isSelected) {
-                                    selectedVerses - verse.number
-                                } else {
-                                    selectedVerses + verse.number
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = if (isExpanded) 80.dp else 64.dp),
+                    contentPadding = PaddingValues(16.dp),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .widthIn(max = if (isExpanded) 800.dp else Double.POSITIVE_INFINITY.dp)
+                ) {
+                    items(chapter.verses) { verse ->
+                        val isSelected = selectedVerses.contains(verse.number)
+                        Card(
+                            colors = if (isSelected) {
+                                CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                            } else {
+                                CardDefaults.cardColors()
+                            },
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .aspectRatio(1f)
+                                .clickable {
+                                    selectedVerses = if (isSelected) {
+                                        selectedVerses - verse.number
+                                    } else {
+                                        selectedVerses + verse.number
+                                    }
                                 }
-                            }
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
                         ) {
-                            Text(
-                                text = verse.number.toString(),
-                                style = MaterialTheme.typography.titleMedium
-                            )
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(
+                                    text = verse.number.toString(),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
                         }
                     }
                 }

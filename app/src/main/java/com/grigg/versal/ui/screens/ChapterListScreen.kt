@@ -4,8 +4,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -19,16 +23,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.grigg.versal.data.ScriptureRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onChapterClick: (Int) -> Unit) {
     val book = ScriptureRepository.getBook(volumeId, bookId)
+    val adaptiveInfo = currentWindowAdaptiveInfoV2()
+    val isExpanded = adaptiveInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
+    val layoutDirection = LocalLayoutDirection.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -42,28 +53,40 @@ fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onCh
         }
     ) { paddingValues ->
         if (book != null) {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 64.dp),
-                contentPadding = PaddingValues(16.dp),
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        bottom = paddingValues.calculateBottomPadding(),
+                        start = paddingValues.calculateStartPadding(layoutDirection),
+                        end = paddingValues.calculateEndPadding(layoutDirection)
+                    ),
+                contentAlignment = Alignment.TopCenter
             ) {
-                items(book.chapters) { chapter ->
-                    Card(
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .aspectRatio(1f)
-                            .clickable { onChapterClick(chapter.number) }
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = if (isExpanded) 80.dp else 64.dp),
+                    contentPadding = PaddingValues(16.dp),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .widthIn(max = if (isExpanded) 800.dp else Double.POSITIVE_INFINITY.dp)
+                ) {
+                    items(book.chapters) { chapter ->
+                        Card(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .aspectRatio(1f)
+                                .clickable { onChapterClick(chapter.number) }
                         ) {
-                            Text(
-                                text = chapter.number.toString(),
-                                style = MaterialTheme.typography.titleMedium
-                            )
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(
+                                    text = chapter.number.toString(),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
                         }
                     }
                 }
