@@ -40,7 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowWidthSizeClass
+import androidx.window.core.layout.WindowSizeClass
 import com.grigg.versal.data.ScriptureRepository
 import com.grigg.versal.model.VerseSelection
 
@@ -54,7 +54,7 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
     val volume = ScriptureRepository.getVolume(volumeId)
     
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-    val isExpanded = adaptiveInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
+    val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     
     var selectedVerses by remember { mutableStateOf(setOf<Int>()) }
 
