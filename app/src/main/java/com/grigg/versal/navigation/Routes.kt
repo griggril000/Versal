@@ -15,7 +15,12 @@ sealed interface Route : NavKey {
     data class Chapters(val volumeId: String, val bookId: String) : Route
 
     @Serializable
-    data class Verses(val volumeId: String, val bookId: String, val chapterNumber: Int) : Route
+    data class Verses(
+        val volumeId: String,
+        val bookId: String,
+        val chapterNumber: Int,
+        val initialSelectedVerses: Set<Int> = emptySet()
+    ) : Route
 
     @Serializable
     data object About : Route

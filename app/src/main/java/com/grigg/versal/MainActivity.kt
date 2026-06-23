@@ -113,6 +113,9 @@ fun MainScreen() {
                             onBookClick = { volumeId, bookId ->
                                 backStack.add(Route.Chapters(volumeId, bookId))
                             },
+                            onReferenceClick = { volumeId, bookId, chapterNum, selectedVerses ->
+                                backStack.add(Route.Verses(volumeId, bookId, chapterNum, selectedVerses))
+                            },
                             onAboutClick = {
                                 backStack.add(Route.About)
                             }
@@ -153,6 +156,7 @@ fun MainScreen() {
                             volumeId = key.volumeId,
                             bookId = key.bookId,
                             chapterNumber = key.chapterNumber,
+                            initialSelectedVerses = key.initialSelectedVerses,
                             onBack = { backStack.removeAt(backStack.size - 1) }
                         )
                     }

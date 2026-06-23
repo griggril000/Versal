@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -50,14 +51,17 @@ import com.grigg.versal.ui.theme.VersalTheme
 fun VolumeListScreen(
     onVolumeClick: (String) -> Unit,
     onBookClick: (String, String) -> Unit,
+    onReferenceClick: (String, String, Int, Set<Int>) -> Unit,
     onAboutClick: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val searchResults = ScriptureRepository.searchBooks(searchQuery)
+    val parsedReference = ScriptureRepository.parseReference(searchQuery)
     
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
     val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     val layoutDirection = LocalLayoutDirection.current
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
 
     Scaffold(
         topBar = {
@@ -87,6 +91,37 @@ fun VolumeListScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Search books...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (parsedReference != null) {
+                        IconButton(onClick = {
+                            val selection = com.grigg.versal.model.VerseSelection(
+                                volumeSlug = parsedReference.volume.slug,
+                                bookSlug = parsedReference.book.slug,
+                                chapterNumber = parsedReference.chapterNumber,
+                                selectedVerses = parsedReference.selectedVerses
+                            )
+                            uriHandler.openUri(selection.generateLink())
+                        }) {
+                            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open Reference")
+                        }
+                    }
+                },
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    imeAction = androidx.compose.ui.text.input.ImeAction.Go
+                ),
+                keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                    onGo = {
+                        parsedReference?.let { ref ->
+                            val selection = com.grigg.versal.model.VerseSelection(
+                                volumeSlug = ref.volume.slug,
+                                bookSlug = ref.book.slug,
+                                chapterNumber = ref.chapterNumber,
+                                selectedVerses = ref.selectedVerses
+                            )
+                            uriHandler.openUri(selection.generateLink())
+                        }
+                    }
+                ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent
@@ -95,6 +130,39 @@ fun VolumeListScreen(
 
             if (searchQuery.isNotEmpty()) {
                 LazyColumn(modifier = Modifier.weight(1f)) {
+                    parsedReference?.let { ref ->
+                        item {
+                            ListItem(
+                                headlineContent = {
+                                    val verseText = if (ref.selectedVerses.isNotEmpty()) {
+                                        ":${searchQuery.substringAfter(':')}"
+                                    } else ""
+                                    Text("Go to ${ref.book.name} ${ref.chapterNumber}$verseText")
+                                },
+                                supportingContent = { Text("Reference Match") },
+                                trailingContent = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.OpenInNew,
+                                        contentDescription = null
+                                    )
+                                },
+                                colors = ListItemDefaults.colors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                modifier = Modifier.clickable {
+                                    val selection = com.grigg.versal.model.VerseSelection(
+                                        volumeSlug = ref.volume.slug,
+                                        bookSlug = ref.book.slug,
+                                        chapterNumber = ref.chapterNumber,
+                                        selectedVerses = ref.selectedVerses
+                                    )
+                                    uriHandler.openUri(selection.generateLink())
+                                }
+                            )
+                            HorizontalDivider()
+                        }
+                    }
+
                     items(searchResults) { (volume, book) ->
                         ListItem(
                             headlineContent = { Text(book.name) },
@@ -137,6 +205,11 @@ fun VolumeListScreen(
 @Composable
 fun VolumeListScreenPreview() {
     VersalTheme {
-        VolumeListScreen(onVolumeClick = {}, onBookClick = { _, _ -> }, onAboutClick = {})
+        VolumeListScreen(
+            onVolumeClick = {},
+            onBookClick = { _, _ -> },
+            onReferenceClick = { _, _, _, _ -> },
+            onAboutClick = {}
+        )
     }
 }

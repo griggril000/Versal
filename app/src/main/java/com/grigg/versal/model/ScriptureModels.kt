@@ -30,6 +30,13 @@ data class Verse(
     val text: String = "" // Placeholder for now
 )
 
+data class Reference(
+    val volume: Volume,
+    val book: Book,
+    val chapterNumber: Int,
+    val selectedVerses: Set<Int> = emptySet()
+)
+
 data class VerseSelection(
     val volumeSlug: String,
     val bookSlug: String,

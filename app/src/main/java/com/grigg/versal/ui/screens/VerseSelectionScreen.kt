@@ -46,7 +46,13 @@ import com.grigg.versal.model.VerseSelection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, onBack: () -> Unit) {
+fun VerseSelectionScreen(
+    volumeId: String,
+    bookId: String,
+    chapterNumber: Int,
+    initialSelectedVerses: Set<Int> = emptySet(),
+    onBack: () -> Unit
+) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val chapter = ScriptureRepository.getChapter(volumeId, bookId, chapterNumber)
@@ -56,7 +62,7 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
     val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     
-    var selectedVerses by remember { mutableStateOf(setOf<Int>()) }
+    var selectedVerses by remember { mutableStateOf(initialSelectedVerses) }
 
     Scaffold(
         topBar = {
