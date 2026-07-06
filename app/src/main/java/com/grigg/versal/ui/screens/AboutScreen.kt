@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.grigg.versal.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,12 +47,12 @@ fun AboutScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "Versal Utility",
+                text = "Versal",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Version 1.0",
+                text = "Version ${BuildConfig.VERSION_NAME}",
                 style = MaterialTheme.typography.bodySmall
             )
             
