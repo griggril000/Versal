@@ -24,6 +24,7 @@
     <string name="feature_request">Feature Request</string>
     <string name="bug_report">Bug Report</string>
     <string name="other">Other</string>
+    <string name="privacy_policy">Privacy Policy</string>
 
     <!-- Navigation and Titles -->
     <string name="volumes">Volumes</string>

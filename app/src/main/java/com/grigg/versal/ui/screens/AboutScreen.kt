@@ -17,13 +17,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -160,7 +160,25 @@ private fun AboutContent(
             Text(
                 text = stringResource(R.string.gospel_library_credit),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
+            )
+
+            Text(
+                text = stringResource(R.string.official_disclaimer),
+                style = MaterialTheme.typography.labelSmall
+            )
+
+            Text(
+                text = stringResource(R.string.privacy_policy),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline
+                ),
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .clickable {
+                        uriHandler.openUri("https://example.com/privacy-policy")
+                    }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -171,13 +189,6 @@ private fun AboutContent(
             ) {
                 Text(stringResource(R.string.send_feedback))
             }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-
-            Text(
-                text = stringResource(R.string.official_disclaimer),
-                style = MaterialTheme.typography.labelSmall
-            )
         }
     }
 }
@@ -254,7 +265,7 @@ fun FeedbackScreen(onBack: () -> Unit) {
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                     modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         .fillMaxWidth(),
                     enabled = !isSubmitting
                 )
