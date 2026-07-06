@@ -30,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,8 @@ import androidx.window.core.layout.WindowSizeClass
 import com.grigg.versal.R
 import com.grigg.versal.data.ScriptureRepository
 import com.grigg.versal.model.VerseSelection
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,12 +62,27 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
     val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     
+    val baseTitle = stringResource(R.string.book_chapter_format, book?.name ?: "", chapterNumber)
     var selectedVerses by remember { mutableStateOf(setOf<Int>()) }
+    var displayedTitle by remember { mutableStateOf(baseTitle) }
+
+    LaunchedEffect(selectedVerses) {
+        if (selectedVerses.isEmpty()) {
+            displayedTitle = baseTitle
+        } else {
+            // Use a debounce timer to wait until the user has finished their selection
+            // before updating the title, minimizing distraction during active tapping.
+            delay(1.seconds)
+            val selection = VerseSelection("", "", chapterNumber, selectedVerses)
+            val verseString = selection.formatSelectedVerses()
+            displayedTitle = "${book?.name ?: ""} $chapterNumber:$verseString"
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.book_chapter_format, book?.name ?: "", chapterNumber)) },
+                title = { Text(displayedTitle) },
                 navigationIcon = {
                     if (!isExpanded) {
                         IconButton(onClick = onBack) {

@@ -4,6 +4,8 @@
     <string name="back">Back</string>
     <string name="home">Home</string>
     <string name="version_format">Version %1$s</string>
+    <string name="about_this_app">About this app</string>
+    <string name="about_this_app_description">Versal was created to solve the challenge of quickly navigating to and sharing specific scripture verses especially non–consecutive verses (ex 9, 11–12). Whether you\'re preparing a lesson, sharing a thought with a friend, or studying on your own, Versal provides a streamlined interface to get you exactly where you need to go.</string>
     <string name="credits_data_sources">Credits &amp; Data Sources</string>
     <string name="credits_description">Versal utilizes open-source scripture datasets to ensure accurate verse counts and metadata.</string>
     <string name="ben_crowder_credit">• Ben Crowder: Special thanks to Ben Crowder for the \'scriptures-json\' repository. His work in converting the Standard Works into accessible formats is the foundation of this app\'s accuracy.</string>

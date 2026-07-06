@@ -84,7 +84,8 @@ fun MainScreen() {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         bottomBar = {
             Breadcrumbs(
                 backStack = backStack,
@@ -202,7 +203,6 @@ fun Breadcrumbs(backStack: NavBackStack<NavKey>, onBreadcrumbClick: (Int) -> Uni
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.Center,
             verticalArrangement = Arrangement.Center

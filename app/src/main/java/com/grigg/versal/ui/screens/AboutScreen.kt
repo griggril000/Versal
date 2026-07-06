@@ -100,7 +100,7 @@ private fun AboutContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 0.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
@@ -111,6 +111,18 @@ private fun AboutContent(
             Text(
                 text = stringResource(R.string.version_format, BuildConfig.VERSION_NAME),
                 style = MaterialTheme.typography.bodySmall
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+            Text(
+                text = stringResource(R.string.about_this_app),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = stringResource(R.string.about_this_app_description),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp)
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -181,7 +193,7 @@ private fun AboutContent(
                     }
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider(modifier = Modifier.padding(top = 16.dp, bottom = 12.dp))
 
             Button(
                 onClick = onShowFeedback,
@@ -234,7 +246,7 @@ fun FeedbackScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 0.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             OutlinedTextField(
