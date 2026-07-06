@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,7 +37,7 @@ import com.grigg.versal.data.ScriptureRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onChapterClick: (Int) -> Unit) {
+fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onHomeClick: () -> Unit, onChapterClick: (Int) -> Unit) {
     val book = ScriptureRepository.getBook(volumeId, bookId)
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
     val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
@@ -49,6 +50,11 @@ fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onCh
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onHomeClick) {
+                        Icon(Icons.Default.Home, contentDescription = stringResource(R.string.home))
                     }
                 }
             )

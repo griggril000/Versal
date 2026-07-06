@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -50,7 +51,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(onBack: () -> Unit) {
+fun AboutScreen(onBack: () -> Unit, onHomeClick: () -> Unit) {
     var showFeedbackForm by remember { mutableStateOf(false) }
 
     if (showFeedbackForm) {
@@ -58,6 +59,7 @@ fun AboutScreen(onBack: () -> Unit) {
     } else {
         AboutContent(
             onBack = onBack,
+            onHomeClick = onHomeClick,
             onShowFeedback = { showFeedbackForm = true }
         )
     }
@@ -67,6 +69,7 @@ fun AboutScreen(onBack: () -> Unit) {
 @Composable
 private fun AboutContent(
     onBack: () -> Unit,
+    onHomeClick: () -> Unit,
     onShowFeedback: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -79,6 +82,14 @@ private fun AboutContent(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onHomeClick) {
+                        Icon(
+                            Icons.Default.Home,
+                            contentDescription = stringResource(R.string.home)
                         )
                     }
                 }

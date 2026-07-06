@@ -2,6 +2,7 @@
     <string name="app_name" translatable="false">Versal</string>
     <string name="about_versal">About Versal</string>
     <string name="back">Back</string>
+    <string name="home">Home</string>
     <string name="version_format">Version %1$s</string>
     <string name="credits_data_sources">Credits &amp; Data Sources</string>
     <string name="credits_description">Versal utilizes open-source scripture datasets to ensure accurate verse counts and metadata.</string>

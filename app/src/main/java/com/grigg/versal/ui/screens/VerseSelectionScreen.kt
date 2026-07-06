@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,13 +49,7 @@ import com.grigg.versal.model.VerseSelection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VerseSelectionScreen(
-    volumeId: String,
-    bookId: String,
-    chapterNumber: Int,
-    initialSelectedVerses: Set<Int> = emptySet(),
-    onBack: () -> Unit
-) {
+fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, onBack: () -> Unit, onHomeClick: () -> Unit) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val chapter = ScriptureRepository.getChapter(volumeId, bookId, chapterNumber)
@@ -64,7 +59,7 @@ fun VerseSelectionScreen(
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
     val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
     
-    var selectedVerses by remember { mutableStateOf(initialSelectedVerses) }
+    var selectedVerses by remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
         topBar = {
@@ -112,6 +107,10 @@ fun VerseSelectionScreen(
                             context.startActivity(shareIntent)
                         }) {
                             Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_link))
+                        }
+                    } else {
+                        IconButton(onClick = onHomeClick) {
+                            Icon(Icons.Default.Home, contentDescription = stringResource(R.string.home))
                         }
                     }
                 }

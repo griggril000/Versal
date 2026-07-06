@@ -114,9 +114,6 @@ fun MainScreen() {
                             onBookClick = { volumeId, bookId ->
                                 backStack.add(Route.Chapters(volumeId, bookId))
                             },
-                            onReferenceClick = { volumeId, bookId, chapterNum, selectedVerses ->
-                                backStack.add(Route.Verses(volumeId, bookId, chapterNum, selectedVerses))
-                            },
                             onAboutClick = {
                                 backStack.add(Route.About)
                             }
@@ -126,7 +123,14 @@ fun MainScreen() {
                     entry<Route.About>(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
-                        AboutScreen(onBack = { backStack.removeAt(backStack.size - 1) })
+                        AboutScreen(
+                            onBack = { backStack.removeAt(backStack.size - 1) },
+                            onHomeClick = {
+                                while (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                }
+                            }
+                        )
                     }
 
                     entry<Route.Books>(
@@ -135,6 +139,11 @@ fun MainScreen() {
                         BookListScreen(
                             volumeId = key.volumeId,
                             onBack = { backStack.removeAt(backStack.size - 1) },
+                            onHomeClick = {
+                                while (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                }
+                            },
                             onBookClick = { bookId ->
                                 backStack.add(Route.Chapters(key.volumeId, bookId))
                             }
@@ -148,6 +157,11 @@ fun MainScreen() {
                             volumeId = key.volumeId,
                             bookId = key.bookId,
                             onBack = { backStack.removeAt(backStack.size - 1) },
+                            onHomeClick = {
+                                while (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                }
+                            },
                             onChapterClick = { chapterNum ->
                                 backStack.add(Route.Verses(key.volumeId, key.bookId, chapterNum))
                             }
@@ -161,8 +175,12 @@ fun MainScreen() {
                             volumeId = key.volumeId,
                             bookId = key.bookId,
                             chapterNumber = key.chapterNumber,
-                            initialSelectedVerses = key.initialSelectedVerses,
-                            onBack = { backStack.removeAt(backStack.size - 1) }
+                            onBack = { backStack.removeAt(backStack.size - 1) },
+                            onHomeClick = {
+                                while (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                }
+                            }
                         )
                     }
                 }
