@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,10 +36,10 @@ import com.grigg.versal.data.ScriptureRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onHomeClick: () -> Unit, onChapterClick: (Int) -> Unit) {
+fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onChapterClick: (Int) -> Unit) {
     val book = ScriptureRepository.getBook(volumeId, bookId)
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-    val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+    val isWide = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val layoutDirection = LocalLayoutDirection.current
 
     Scaffold(
@@ -50,11 +49,6 @@ fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onHo
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onHomeClick) {
-                        Icon(Icons.Default.Home, contentDescription = stringResource(R.string.home))
                     }
                 }
             )
@@ -73,11 +67,11 @@ fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onHo
                 contentAlignment = Alignment.TopCenter
             ) {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = if (isExpanded) 80.dp else 64.dp),
+                    columns = GridCells.Adaptive(minSize = if (isWide) 80.dp else 64.dp),
                     contentPadding = PaddingValues(16.dp),
                     modifier = Modifier
                         .fillMaxHeight()
-                        .widthIn(max = if (isExpanded) 800.dp else Double.POSITIVE_INFINITY.dp)
+                        .widthIn(max = if (isWide) 800.dp else Double.POSITIVE_INFINITY.dp)
                 ) {
                     items(book.chapters) { chapter ->
                         Card(

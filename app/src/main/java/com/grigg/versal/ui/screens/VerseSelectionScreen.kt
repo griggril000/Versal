@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,7 +51,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, onBack: () -> Unit, onHomeClick: () -> Unit) {
+fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, onBack: () -> Unit) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val chapter = ScriptureRepository.getChapter(volumeId, bookId, chapterNumber)
@@ -60,7 +59,7 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
     val volume = ScriptureRepository.getVolume(volumeId)
     
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-    val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+    val isWide = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     
     val baseTitle = stringResource(R.string.book_chapter_format, book?.name ?: "", chapterNumber)
     var selectedVerses by remember { mutableStateOf(setOf<Int>()) }
@@ -84,10 +83,8 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
             TopAppBar(
                 title = { Text(displayedTitle) },
                 navigationIcon = {
-                    if (!isExpanded) {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                        }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -126,10 +123,6 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
                         }) {
                             Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_link))
                         }
-                    } else {
-                        IconButton(onClick = onHomeClick) {
-                            Icon(Icons.Default.Home, contentDescription = stringResource(R.string.home))
-                        }
                     }
                 }
             )
@@ -149,11 +142,11 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
                 contentAlignment = Alignment.TopCenter
             ) {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = if (isExpanded) 80.dp else 64.dp),
+                    columns = GridCells.Adaptive(minSize = if (isWide) 80.dp else 64.dp),
                     contentPadding = PaddingValues(16.dp),
                     modifier = Modifier
                         .fillMaxHeight()
-                        .widthIn(max = if (isExpanded) 800.dp else Double.POSITIVE_INFINITY.dp)
+                        .widthIn(max = if (isWide) 800.dp else Double.POSITIVE_INFINITY.dp)
                 ) {
                     items(chapter.verses) { verse ->
                         val isSelected = selectedVerses.contains(verse.number)

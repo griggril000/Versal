@@ -1,6 +1,7 @@
 package com.grigg.versal.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -8,21 +9,19 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -52,28 +52,19 @@ import com.grigg.versal.ui.theme.VersalTheme
 @Composable
 fun VolumeListScreen(
     onVolumeClick: (String) -> Unit,
-    onBookClick: (String, String) -> Unit,
-    onReferenceClick: (String, String, Int, Set<Int>) -> Unit,
-    onAboutClick: () -> Unit
+    onBookClick: (String, String) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val searchResults = ScriptureRepository.searchBooks(searchQuery)
-    val parsedReference = ScriptureRepository.parseReference(searchQuery)
     
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-    val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+    val isWide = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val layoutDirection = LocalLayoutDirection.current
-    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.scriptures)) },
-                actions = {
-                    IconButton(onClick = onAboutClick) {
-                        Icon(Icons.Default.Info, contentDescription = stringResource(R.string.about))
-                    }
-                }
+                title = { Text(stringResource(R.string.scriptures)) }
             )
         }
     ) { paddingValues ->
@@ -85,45 +76,17 @@ fun VolumeListScreen(
                     bottom = paddingValues.calculateBottomPadding(),
                     start = paddingValues.calculateStartPadding(layoutDirection),
                     end = paddingValues.calculateEndPadding(layoutDirection)
-                )
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 800.dp),
                 placeholder = { Text(stringResource(R.string.search_books)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (parsedReference != null) {
-                        IconButton(onClick = {
-                            val selection = com.grigg.versal.model.VerseSelection(
-                                volumeSlug = parsedReference.volume.slug,
-                                bookSlug = parsedReference.book.slug,
-                                chapterNumber = parsedReference.chapterNumber,
-                                selectedVerses = parsedReference.selectedVerses
-                            )
-                            uriHandler.openUri(selection.generateLink())
-                        }) {
-                            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open Reference")
-                        }
-                    }
-                },
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                    imeAction = androidx.compose.ui.text.input.ImeAction.Go
-                ),
-                keyboardActions = androidx.compose.foundation.text.KeyboardActions(
-                    onGo = {
-                        parsedReference?.let { ref ->
-                            val selection = com.grigg.versal.model.VerseSelection(
-                                volumeSlug = ref.volume.slug,
-                                bookSlug = ref.book.slug,
-                                chapterNumber = ref.chapterNumber,
-                                selectedVerses = ref.selectedVerses
-                            )
-                            uriHandler.openUri(selection.generateLink())
-                        }
-                    }
-                ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent
@@ -131,40 +94,11 @@ fun VolumeListScreen(
             )
 
             if (searchQuery.isNotEmpty()) {
-                LazyColumn(modifier = Modifier.weight(1f)) {
-                    parsedReference?.let { ref ->
-                        item {
-                            ListItem(
-                                headlineContent = {
-                                    val verseText = if (ref.selectedVerses.isNotEmpty()) {
-                                        ":${searchQuery.substringAfter(':')}"
-                                    } else ""
-                                    Text("Go to ${ref.book.name} ${ref.chapterNumber}$verseText")
-                                },
-                                supportingContent = { Text("Reference Match") },
-                                trailingContent = {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.OpenInNew,
-                                        contentDescription = null
-                                    )
-                                },
-                                colors = ListItemDefaults.colors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                                ),
-                                modifier = Modifier.clickable {
-                                    val selection = com.grigg.versal.model.VerseSelection(
-                                        volumeSlug = ref.volume.slug,
-                                        bookSlug = ref.book.slug,
-                                        chapterNumber = ref.chapterNumber,
-                                        selectedVerses = ref.selectedVerses
-                                    )
-                                    uriHandler.openUri(selection.generateLink())
-                                }
-                            )
-                            HorizontalDivider()
-                        }
-                    }
-
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .widthIn(max = 800.dp)
+                ) {
                     items(searchResults) { (volume, book) ->
                         ListItem(
                             headlineContent = { Text(book.name) },
@@ -175,26 +109,31 @@ fun VolumeListScreen(
                     }
                 }
             } else {
-                LazyVerticalGrid(
-                    columns = if (isExpanded) GridCells.Fixed(2) else GridCells.Fixed(1),
-                    contentPadding = PaddingValues(16.dp),
-                    modifier = Modifier.weight(1f)
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    items(ScriptureRepository.volumes) { volume ->
-                        Card(
-                            onClick = { onVolumeClick(volume.id) },
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            ListItem(
-                                headlineContent = { Text(volume.name) },
-                                supportingContent = { Text(stringResource(R.string.books_count_format, volume.books.size)) },
-                                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                            )
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = if (isWide) 300.dp else 240.dp),
+                        contentPadding = PaddingValues(16.dp),
+                        modifier = Modifier.widthIn(max = 1200.dp)
+                    ) {
+                        items(ScriptureRepository.volumes) { volume ->
+                            Card(
+                                onClick = { onVolumeClick(volume.id) },
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                ListItem(
+                                    headlineContent = { Text(volume.name) },
+                                    supportingContent = { Text(stringResource(R.string.books_count_format, volume.books.size)) },
+                                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                                )
+                            }
                         }
                     }
                 }
@@ -207,11 +146,6 @@ fun VolumeListScreen(
 @Composable
 fun VolumeListScreenPreview() {
     VersalTheme {
-        VolumeListScreen(
-            onVolumeClick = {},
-            onBookClick = { _, _ -> },
-            onReferenceClick = { _, _, _, _ -> },
-            onAboutClick = {}
-        )
+        VolumeListScreen(onVolumeClick = {}, onBookClick = { _, _ -> })
     }
 }
