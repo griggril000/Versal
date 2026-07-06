@@ -94,7 +94,12 @@ fun MainScreen() {
                 NavigationRailItem(
                     selected = (backStack.lastOrNull() is Route.Home) || (backStack.isNotEmpty() && backStack.last() !is Route.About),
                     onClick = {
-                        while (backStack.size > 1) backStack.removeLastOrNull()
+                        while (backStack.isNotEmpty() && backStack.last() !is Route.Home) {
+                            backStack.removeLastOrNull()
+                        }
+                        if (backStack.isEmpty()) {
+                            backStack.add(Route.Home)
+                        }
                     },
                     icon = { Icon(Icons.Default.Home, contentDescription = stringResource(R.string.home)) },
                     label = { Text(stringResource(R.string.home)) }
@@ -160,7 +165,12 @@ fun MainScreen() {
                             NavigationBarItem(
                                 selected = (backStack.lastOrNull() is Route.Home) || (backStack.isNotEmpty() && backStack.last() !is Route.About),
                                 onClick = {
-                                    while (backStack.size > 1) backStack.removeLastOrNull()
+                                    while (backStack.isNotEmpty() && backStack.last() !is Route.Home) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                    if (backStack.isEmpty()) {
+                                        backStack.add(Route.Home)
+                                    }
                                 },
                                 icon = { Icon(Icons.Default.Home, null) },
                                 label = { Text(stringResource(R.string.home)) }
