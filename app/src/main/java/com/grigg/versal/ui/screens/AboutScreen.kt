@@ -50,7 +50,6 @@ import com.grigg.versal.data.FormspreeService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
-import com.grigg.versal.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
