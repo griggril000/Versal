@@ -107,9 +107,11 @@ fun MainScreen() {
                 NavigationRailItem(
                     selected = backStack.lastOrNull() is Route.About,
                     onClick = {
-                        if (backStack.lastOrNull() !is Route.About) {
-                            // When going to About, we clear the stack to ensure it's a full-screen
-                            // destination and doesn't show side-by-side with the home screen.
+                        if (backStack.lastOrNull() is Route.About) {
+                            // If already on About, we remove and re-add to reset its internal state (like exiting feedback)
+                            backStack.removeLastOrNull()
+                            backStack.add(Route.About)
+                        } else {
                             while (backStack.isNotEmpty()) backStack.removeLastOrNull()
                             backStack.add(Route.About)
                         }
@@ -178,7 +180,10 @@ fun MainScreen() {
                             NavigationBarItem(
                                 selected = backStack.lastOrNull() is Route.About,
                                 onClick = {
-                                    if (backStack.lastOrNull() !is Route.About) {
+                                    if (backStack.lastOrNull() is Route.About) {
+                                        backStack.removeLastOrNull()
+                                        backStack.add(Route.About)
+                                    } else {
                                         while (backStack.isNotEmpty()) backStack.removeLastOrNull()
                                         backStack.add(Route.About)
                                     }

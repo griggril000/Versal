@@ -187,7 +187,7 @@ private fun AboutContent(
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .clickable {
-                            uriHandler.openUri("https://example.com/privacy-policy")
+                            uriHandler.openUri("https://github.com/griggril000/Versal/PRIVACY_POLICY.md")
                         }
                 )
 
