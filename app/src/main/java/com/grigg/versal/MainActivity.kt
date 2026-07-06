@@ -132,7 +132,7 @@ fun MainScreen() {
                         .navigationBarsPadding()
                         .padding(bottom = bottomPadding)
                 ) {
-                    if (backStack.size > 1 || (backStack.isNotEmpty() && backStack.last() is Route.About)) {
+                    if (backStack.size > 1) {
                         Breadcrumbs(
                             backStack = backStack,
                             isCompactHeight = isCompactHeight
@@ -257,7 +257,6 @@ fun Breadcrumbs(backStack: NavBackStack<NavKey>, isCompactHeight: Boolean, onBre
 
     val breadcrumbItems = when (lastKey) {
         is Route.Home -> listOf(stringResource(R.string.volumes) to Route.Home)
-        is Route.About -> listOf(stringResource(R.string.about) to Route.About)
         is Route.Books -> listOf(
             stringResource(R.string.volumes) to Route.Home,
             (ScriptureRepository.getVolume(lastKey.volumeId)?.name ?: stringResource(R.string.books)) to lastKey
