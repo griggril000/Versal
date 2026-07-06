@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -80,6 +81,8 @@ fun MainScreen() {
     val windowSize = adaptiveInfo.windowSizeClass
     val isWide = windowSize.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val isCompactHeight = !windowSize.isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)
+    
+    val posture = adaptiveInfo.windowPosture
 
     Row(modifier = Modifier.fillMaxSize()) {
         if (isWide) {
@@ -89,7 +92,7 @@ fun MainScreen() {
                     .displayCutoutPadding()
             ) {
                 NavigationRailItem(
-                    selected = backStack.lastOrNull() is Route.Home || (backStack.size > 0 && backStack.last() !is Route.About),
+                    selected = (backStack.lastOrNull() is Route.Home) || (backStack.isNotEmpty() && backStack.last() !is Route.About),
                     onClick = {
                         while (backStack.size > 1) backStack.removeLastOrNull()
                     },
@@ -100,6 +103,9 @@ fun MainScreen() {
                     selected = backStack.lastOrNull() is Route.About,
                     onClick = {
                         if (backStack.lastOrNull() !is Route.About) {
+                            // When going to About, we clear the stack to ensure it's a full-screen
+                            // destination and doesn't show side-by-side with the home screen.
+                            while (backStack.isNotEmpty()) backStack.removeLastOrNull()
                             backStack.add(Route.About)
                         }
                     },
@@ -111,44 +117,48 @@ fun MainScreen() {
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
-                Column(modifier = Modifier.navigationBarsPadding()) {
-                    if (backStack.size > 1) {
+                val bottomPadding = if (posture.isTabletop) 16.dp else 0.dp
+                Column(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(bottom = bottomPadding)
+                ) {
+                    if (backStack.size > 1 || (backStack.isNotEmpty() && backStack.last() is Route.About)) {
                         Breadcrumbs(
                             backStack = backStack,
-                            isCompactHeight = isCompactHeight,
-                            onBreadcrumbClick = { targetKey ->
-                                val indexInStack = backStack.indexOfLast { it == targetKey }
-                                if (indexInStack >= 0) {
-                                    while (backStack.size > indexInStack + 1) {
-                                        backStack.removeLastOrNull()
+                            isCompactHeight = isCompactHeight
+                        ) { targetKey ->
+                            val indexInStack = backStack.indexOfLast { it == targetKey }
+                            if (indexInStack >= 0) {
+                                while (backStack.size > indexInStack + 1) {
+                                    backStack.removeLastOrNull()
+                                }
+                            } else {
+                                while (backStack.isNotEmpty()) backStack.removeLastOrNull()
+                                backStack.add(Route.Home)
+                                when (targetKey) {
+                                    is Route.Books -> backStack.add(targetKey)
+                                    is Route.Chapters -> {
+                                        backStack.add(Route.Books(targetKey.volumeId))
+                                        backStack.add(targetKey)
                                     }
-                                } else {
-                                    // If not in stack, rebuild a clean hierarchical path
-                                    while (backStack.size > 0) backStack.removeLastOrNull()
-                                    backStack.add(Route.Home)
-                                    when (targetKey) {
-                                        is Route.Books -> backStack.add(targetKey)
-                                        is Route.Chapters -> {
-                                            backStack.add(Route.Books(targetKey.volumeId))
-                                            backStack.add(targetKey)
-                                        }
-                                        is Route.Verses -> {
-                                            backStack.add(Route.Books(targetKey.volumeId))
-                                            backStack.add(Route.Chapters(targetKey.volumeId, targetKey.bookId))
-                                            backStack.add(targetKey)
-                                        }
-                                        is Route.About -> backStack.add(Route.About)
-                                        else -> {}
+                                    is Route.Verses -> {
+                                        backStack.add(Route.Books(targetKey.volumeId))
+                                        backStack.add(Route.Chapters(targetKey.volumeId, targetKey.bookId))
+                                        backStack.add(targetKey)
                                     }
+                                    is Route.About -> backStack.add(Route.About)
+                                    else -> {}
                                 }
                             }
-                        )
+                        }
                     }
                     if (!isWide) {
                         NavigationBar {
                             NavigationBarItem(
-                                selected = backStack.lastOrNull() is Route.Home || (backStack.size > 0 && backStack.last() !is Route.About),
+                                selected = (backStack.lastOrNull() is Route.Home) || (backStack.isNotEmpty() && backStack.last() !is Route.About),
                                 onClick = {
                                     while (backStack.size > 1) backStack.removeLastOrNull()
                                 },
@@ -159,6 +169,7 @@ fun MainScreen() {
                                 selected = backStack.lastOrNull() is Route.About,
                                 onClick = {
                                     if (backStack.lastOrNull() !is Route.About) {
+                                        while (backStack.isNotEmpty()) backStack.removeLastOrNull()
                                         backStack.add(Route.About)
                                     }
                                 },
@@ -172,39 +183,25 @@ fun MainScreen() {
         ) { innerPadding ->
             Box(
                 modifier = Modifier
-                    .padding(innerPadding)
+                    .padding(bottom = innerPadding.calculateBottomPadding())
                     .consumeWindowInsets(innerPadding)
             ) {
                 NavDisplay(
                     backStack = backStack,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    },
+                    onBack = { backStack.removeLastOrNull() },
                     entryProvider = entryProvider {
                         entry<Route.Home> {
                             VolumeListScreen(
-                                onVolumeClick = { volumeId ->
-                                    backStack.add(Route.Books(volumeId))
-                                },
-                                onBookClick = { volumeId, bookId ->
-                                    backStack.add(Route.Chapters(volumeId, bookId))
-                                }
-                            )
-                        }
-
-                        entry<Route.About> {
-                            AboutScreen(
-                                onBack = { backStack.removeAt(backStack.size - 1) }
+                                onVolumeClick = { backStack.add(Route.Books(it)) },
+                                onBookClick = { vId, bId -> backStack.add(Route.Chapters(vId, bId)) }
                             )
                         }
 
                         entry<Route.Books> { key ->
                             BookListScreen(
                                 volumeId = key.volumeId,
-                                onBack = { backStack.removeAt(backStack.size - 1) },
-                                onBookClick = { bookId ->
-                                    backStack.add(Route.Chapters(key.volumeId, bookId))
-                                }
+                                onBack = { backStack.removeLastOrNull() },
+                                onBookClick = { backStack.add(Route.Chapters(key.volumeId, it)) }
                             )
                         }
 
@@ -212,10 +209,8 @@ fun MainScreen() {
                             ChapterListScreen(
                                 volumeId = key.volumeId,
                                 bookId = key.bookId,
-                                onBack = { backStack.removeAt(backStack.size - 1) },
-                                onChapterClick = { chapterNum ->
-                                    backStack.add(Route.Verses(key.volumeId, key.bookId, chapterNum))
-                                }
+                                onBack = { backStack.removeLastOrNull() },
+                                onChapterClick = { backStack.add(Route.Verses(key.volumeId, key.bookId, it)) }
                             )
                         }
 
@@ -224,8 +219,15 @@ fun MainScreen() {
                                 volumeId = key.volumeId,
                                 bookId = key.bookId,
                                 chapterNumber = key.chapterNumber,
-                                onBack = { backStack.removeAt(backStack.size - 1) }
+                                onBack = { backStack.removeLastOrNull() }
                             )
+                        }
+
+                        entry<Route.About> {
+                            AboutScreen(onBack = { 
+                                while (backStack.isNotEmpty()) backStack.removeLastOrNull()
+                                backStack.add(Route.Home)
+                            })
                         }
                     }
                 )
