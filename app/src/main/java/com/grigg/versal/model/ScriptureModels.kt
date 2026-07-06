@@ -30,12 +30,41 @@ data class Verse(
     val text: String = "" // Placeholder for now
 )
 
+data class Reference(
+    val volume: Volume,
+    val book: Book,
+    val chapterNumber: Int,
+    val selectedVerses: Set<Int> = emptySet()
+)
+
 data class VerseSelection(
     val volumeSlug: String,
     val bookSlug: String,
     val chapterNumber: Int,
     val selectedVerses: Set<Int> = emptySet()
 ) {
+    fun formatSelectedVerses(): String {
+        if (selectedVerses.isEmpty()) return ""
+
+        val sortedVerses = selectedVerses.sorted()
+        val ranges = mutableListOf<String>()
+        var start = sortedVerses[0]
+        var end = sortedVerses[0]
+
+        for (i in 1 until sortedVerses.size) {
+            if (sortedVerses[i] == end + 1) {
+                end = sortedVerses[i]
+            } else {
+                ranges.add(if (start == end) "$start" else "$start-$end")
+                start = sortedVerses[i]
+                end = sortedVerses[i]
+            }
+        }
+        ranges.add(if (start == end) "$start" else "$start-$end")
+
+        return ranges.joinToString(", ")
+    }
+
     fun generateLink(lang: String = "eng"): String {
         if (selectedVerses.isEmpty()) {
             return "https://www.churchofjesuschrist.org/study/scriptures/$volumeSlug/$bookSlug/$chapterNumber?lang=$lang"

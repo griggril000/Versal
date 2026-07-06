@@ -1,12 +1,14 @@
 package com.grigg.versal.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,11 +30,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.grigg.versal.R
 import com.grigg.versal.data.ScriptureRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,71 +45,78 @@ import com.grigg.versal.data.ScriptureRepository
 fun BookListScreen(volumeId: String, onBack: () -> Unit, onBookClick: (String) -> Unit) {
     val volume = ScriptureRepository.getVolume(volumeId)
     val adaptiveInfo = currentWindowAdaptiveInfoV2()
-    val isExpanded = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+    val isWide = adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val layoutDirection = LocalLayoutDirection.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(volume?.name ?: "Books") },
+                title = { Text(volume?.name ?: stringResource(R.string.books)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
         }
     ) { paddingValues ->
         if (volume != null) {
-            if (isExpanded) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(16.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            top = paddingValues.calculateTopPadding(),
-                            bottom = paddingValues.calculateBottomPadding(),
-                            start = paddingValues.calculateStartPadding(layoutDirection),
-                            end = paddingValues.calculateEndPadding(layoutDirection)
-                        )
-                ) {
-                    items(volume.books) { book ->
-                        Card(
-                            onClick = { onBookClick(book.id) },
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            ListItem(
-                                headlineContent = { Text(book.name) },
-                                supportingContent = { Text("${book.chapters.size} chapters") },
-                                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        bottom = paddingValues.calculateBottomPadding(),
+                        start = paddingValues.calculateStartPadding(layoutDirection),
+                        end = paddingValues.calculateEndPadding(layoutDirection)
+                    ),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                if (isWide) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 350.dp),
+                        contentPadding = PaddingValues(16.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .widthIn(max = 1200.dp)
+                    ) {
+                        items(volume.books) { book ->
+                            Card(
+                                onClick = { onBookClick(book.id) },
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                ListItem(
+                                    headlineContent = { Text(book.name) },
+                                    supportingContent = { Text(stringResource(R.string.chapters_count_format, book.chapters.size)) },
+                                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                                )
+                            }
                         }
                     }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    items(volume.books) { book ->
-                        ListItem(
-                            headlineContent = { Text(book.name) },
-                            supportingContent = { Text("${book.chapters.size} chapters") },
-                            modifier = Modifier.clickable { onBookClick(book.id) }
-                        )
-                        HorizontalDivider()
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .widthIn(max = 800.dp)
+                    ) {
+                        items(volume.books) { book ->
+                            ListItem(
+                                headlineContent = { Text(book.name) },
+                                supportingContent = { Text(stringResource(R.string.chapters_count_format, book.chapters.size)) },
+                                modifier = Modifier.clickable { onBookClick(book.id) }
+                            )
+                            HorizontalDivider()
+                        }
                     }
                 }
             }
         } else {
-            Text("Volume not found", modifier = Modifier.padding(paddingValues))
+            Text(stringResource(R.string.volume_not_found), modifier = Modifier.padding(paddingValues))
         }
     }
 }
