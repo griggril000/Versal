@@ -28,8 +28,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.grigg.versal.R
 import com.grigg.versal.data.ScriptureRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,10 +45,10 @@ fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onCh
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(book?.name ?: "Chapters") },
+                title = { Text(book?.name ?: stringResource(R.string.chapters)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -92,7 +94,7 @@ fun ChapterListScreen(volumeId: String, bookId: String, onBack: () -> Unit, onCh
                 }
             }
         } else {
-            Text("Book not found", modifier = Modifier.padding(paddingValues))
+            Text(stringResource(R.string.book_not_found), modifier = Modifier.padding(paddingValues))
         }
     }
 }

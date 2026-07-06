@@ -31,8 +31,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.grigg.versal.R
 import com.grigg.versal.data.ScriptureRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,10 +48,10 @@ fun BookListScreen(volumeId: String, onBack: () -> Unit, onBookClick: (String) -
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(volume?.name ?: "Books") },
+                title = { Text(volume?.name ?: stringResource(R.string.books)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -81,7 +83,7 @@ fun BookListScreen(volumeId: String, onBack: () -> Unit, onBookClick: (String) -
                         ) {
                             ListItem(
                                 headlineContent = { Text(book.name) },
-                                supportingContent = { Text("${book.chapters.size} chapters") },
+                                supportingContent = { Text(stringResource(R.string.chapters_count_format, book.chapters.size)) },
                                 colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                             )
                         }
@@ -96,7 +98,7 @@ fun BookListScreen(volumeId: String, onBack: () -> Unit, onBookClick: (String) -
                     items(volume.books) { book ->
                         ListItem(
                             headlineContent = { Text(book.name) },
-                            supportingContent = { Text("${book.chapters.size} chapters") },
+                            supportingContent = { Text(stringResource(R.string.chapters_count_format, book.chapters.size)) },
                             modifier = Modifier.clickable { onBookClick(book.id) }
                         )
                         HorizontalDivider()
@@ -104,7 +106,7 @@ fun BookListScreen(volumeId: String, onBack: () -> Unit, onBookClick: (String) -
                 }
             }
         } else {
-            Text("Volume not found", modifier = Modifier.padding(paddingValues))
+            Text(stringResource(R.string.volume_not_found), modifier = Modifier.padding(paddingValues))
         }
     }
 }

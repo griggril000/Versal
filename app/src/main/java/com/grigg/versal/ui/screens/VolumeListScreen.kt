@@ -40,9 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.grigg.versal.R
 import com.grigg.versal.data.ScriptureRepository
 import com.grigg.versal.ui.theme.VersalTheme
 
@@ -66,10 +68,10 @@ fun VolumeListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scriptures") },
+                title = { Text(stringResource(R.string.scriptures)) },
                 actions = {
                     IconButton(onClick = onAboutClick) {
-                        Icon(Icons.Default.Info, contentDescription = "About")
+                        Icon(Icons.Default.Info, contentDescription = stringResource(R.string.about))
                     }
                 }
             )
@@ -89,7 +91,7 @@ fun VolumeListScreen(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search books...") },
+                placeholder = { Text(stringResource(R.string.search_books)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (parsedReference != null) {
@@ -190,7 +192,7 @@ fun VolumeListScreen(
                         ) {
                             ListItem(
                                 headlineContent = { Text(volume.name) },
-                                supportingContent = { Text("${volume.books.size} books") },
+                                supportingContent = { Text(stringResource(R.string.books_count_format, volume.books.size)) },
                                 colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                             )
                         }

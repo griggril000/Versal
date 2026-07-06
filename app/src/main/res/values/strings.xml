@@ -1,3 +1,50 @@
 <resources>
-    <string name="app_name">Versal</string>
+    <string name="app_name" translatable="false">Versal</string>
+    <string name="about_versal">About Versal</string>
+    <string name="back">Back</string>
+    <string name="version_format">Version %1$s</string>
+    <string name="credits_data_sources">Credits &amp; Data Sources</string>
+    <string name="credits_description">Versal utilizes open-source scripture datasets to ensure accurate verse counts and metadata.</string>
+    <string name="ben_crowder_credit">• Ben Crowder: Special thanks to Ben Crowder for the \'scriptures-json\' repository. His work in converting the Standard Works into accessible formats is the foundation of this app\'s accuracy.</string>
+    <string name="github_link">Visit bcbooks/scriptures-json on GitHub</string>
+    <string name="website_link">Visit bencrowder.net</string>
+    <string name="gospel_library_credit">• Gospel Library: Links are designed to be compatible with the official Gospel Library app and ChurchofJesusChrist.org.</string>
+    <string name="official_disclaimer">Versal is not an official application of The Church of Jesus Christ of Latter-day Saints.</string>
+    <string name="send_feedback">Send Feedback</string>
+    <string name="feedback_type">Feedback Type</string>
+    <string name="email">Email</string>
+    <string name="message">Message</string>
+    <string name="success_thanks">Success! Thank you.</string>
+    <string name="error_format">Error: %1$s</string>
+    <string name="error_code_format">Error: %1$d</string>
+    <string name="send">Send</string>
+    <string name="cancel">Cancel</string>
+    <string name="general_feedback">General Feedback</string>
+    <string name="feature_request">Feature Request</string>
+    <string name="bug_report">Bug Report</string>
+    <string name="other">Other</string>
+
+    <!-- Navigation and Titles -->
+    <string name="volumes">Volumes</string>
+    <string name="about">About</string>
+    <string name="books">Books</string>
+    <string name="chapters">Chapters</string>
+    <string name="scriptures">Scriptures</string>
+    <string name="search_books">Search books…</string>
+
+    <!-- Status and Errors -->
+    <string name="volume_not_found">Volume not found</string>
+    <string name="book_not_found">Book not found</string>
+    <string name="chapter_not_found">Chapter not found</string>
+
+    <!-- Actions -->
+    <string name="clear_selection">Clear Selection</string>
+    <string name="open_link">Open Link</string>
+    <string name="share_link">Share Link</string>
+
+    <!-- Formats -->
+    <string name="chapter_number_format">Chapter %1$d</string>
+    <string name="books_count_format">%1$d books</string>
+    <string name="chapters_count_format">%1$d chapters</string>
+    <string name="book_chapter_format">%1$s %2$d</string>
 </resources>

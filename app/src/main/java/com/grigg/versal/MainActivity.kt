@@ -30,6 +30,7 @@ import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneSt
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
@@ -101,7 +102,7 @@ fun MainScreen() {
                 onBack = {
                     backStack.removeLastOrNull()
                 },
-                sceneStrategy = adaptiveStrategy,
+                sceneStrategies = listOf(adaptiveStrategy),
                 entryProvider = entryProvider {
                     entry<Route.Home>(
                         metadata = ListDetailSceneStrategy.listPane()
@@ -121,11 +122,13 @@ fun MainScreen() {
                             }
                         )
                     }
+
                     entry<Route.About>(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) {
                         AboutScreen(onBack = { backStack.removeAt(backStack.size - 1) })
                     }
+
                     entry<Route.Books>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) { key ->
@@ -137,6 +140,7 @@ fun MainScreen() {
                             }
                         )
                     }
+
                     entry<Route.Chapters>(
                         metadata = ListDetailSceneStrategy.listPane()
                     ) { key ->
@@ -149,6 +153,7 @@ fun MainScreen() {
                             }
                         )
                     }
+
                     entry<Route.Verses>(
                         metadata = ListDetailSceneStrategy.detailPane()
                     ) { key ->
@@ -186,11 +191,11 @@ fun Breadcrumbs(backStack: NavBackStack<NavKey>, onBreadcrumbClick: (Int) -> Uni
         ) {
             backStack.forEachIndexed { index, key ->
                 val label = when (key) {
-                    is Route.Home -> "Volumes"
-                    is Route.About -> "About"
-                    is Route.Books -> ScriptureRepository.getVolume(key.volumeId)?.name ?: "Books"
-                    is Route.Chapters -> ScriptureRepository.getBook(key.volumeId, key.bookId)?.name ?: "Chapters"
-                    is Route.Verses -> "Chapter ${key.chapterNumber}"
+                    is Route.Home -> stringResource(R.string.volumes)
+                    is Route.About -> stringResource(R.string.about)
+                    is Route.Books -> ScriptureRepository.getVolume(key.volumeId)?.name ?: stringResource(R.string.books)
+                    is Route.Chapters -> ScriptureRepository.getBook(key.volumeId, key.bookId)?.name ?: stringResource(R.string.chapters)
+                    is Route.Verses -> stringResource(R.string.chapter_number_format, key.chapterNumber)
                     else -> ""
                 }
                 if (label.isNotEmpty()) {

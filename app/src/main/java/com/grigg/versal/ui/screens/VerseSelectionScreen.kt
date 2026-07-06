@@ -39,8 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import com.grigg.versal.R
 import com.grigg.versal.data.ScriptureRepository
 import com.grigg.versal.model.VerseSelection
 
@@ -67,11 +69,11 @@ fun VerseSelectionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("${book?.name} $chapterNumber") },
+                title = { Text(stringResource(R.string.book_chapter_format, book?.name ?: "", chapterNumber)) },
                 navigationIcon = {
                     if (!isExpanded) {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
                     }
                 },
@@ -80,7 +82,7 @@ fun VerseSelectionScreen(
                         IconButton(onClick = {
                             selectedVerses = emptySet()
                         }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear Selection")
+                            Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear_selection))
                         }
                         IconButton(onClick = {
                             val selection = VerseSelection(
@@ -91,7 +93,7 @@ fun VerseSelectionScreen(
                             )
                             uriHandler.openUri(selection.generateLink())
                         }) {
-                            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open Link")
+                            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = stringResource(R.string.open_link))
                         }
                         IconButton(onClick = {
                             val selection = VerseSelection(
@@ -109,7 +111,7 @@ fun VerseSelectionScreen(
                             val shareIntent = Intent.createChooser(sendIntent, null)
                             context.startActivity(shareIntent)
                         }) {
-                            Icon(Icons.Default.Share, contentDescription = "Share Link")
+                            Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_link))
                         }
                     }
                 }
@@ -169,7 +171,7 @@ fun VerseSelectionScreen(
                 }
             }
         } else {
-            Text("Chapter not found", modifier = Modifier.padding(paddingValues))
+            Text(stringResource(R.string.chapter_not_found), modifier = Modifier.padding(paddingValues))
         }
     }
 }
