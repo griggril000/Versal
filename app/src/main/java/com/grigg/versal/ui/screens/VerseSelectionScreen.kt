@@ -32,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -76,6 +77,7 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
     var displayedTitle by remember { mutableStateOf(baseTitle) }
     var showQrDialog by remember { mutableStateOf(false) }
     var qrBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var qrFooterText by remember { mutableStateOf("") }
 
     LaunchedEffect(selectedVerses) {
         if (selectedVerses.isEmpty()) {
@@ -136,16 +138,6 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
                             Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_link))
                         }
                         IconButton(onClick = {
-                            val selection = VerseSelection(
-                                volumeSlug = volume.slug,
-                                bookSlug = book.slug,
-                                chapterNumber = chapterNumber,
-                                selectedVerses = selectedVerses
-                            )
-                            val link = selection.generateLink()
-                            val verseString = selection.formatSelectedVerses()
-                            val title = "${book.name} $chapterNumber:$verseString"
-                            qrBitmap = QrCodeUtils.generateQrCodeWithText(title, link)
                             showQrDialog = true
                         }) {
                             Icon(Icons.Default.QrCode, contentDescription = stringResource(R.string.generate_qr_code))
@@ -155,29 +147,47 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
             )
         }
     ) { paddingValues ->
-        if (showQrDialog && qrBitmap != null) {
+        if (showQrDialog && volume != null && book != null) {
+            val selection = remember(selectedVerses) {
+                VerseSelection(
+                    volumeSlug = volume.slug,
+                    bookSlug = book.slug,
+                    chapterNumber = chapterNumber,
+                    selectedVerses = selectedVerses
+                )
+            }
+            val link = remember(selection) { selection.generateLink() }
+            val verseString = remember(selection) { selection.formatSelectedVerses() }
+            val title = "${book.name} $chapterNumber:$verseString"
+
+            LaunchedEffect(qrFooterText, selection) {
+                qrBitmap = QrCodeUtils.generateQrCodeWithText(title, link, qrFooterText)
+            }
+
             AlertDialog(
                 onDismissRequest = { showQrDialog = false },
                 title = { Text(stringResource(R.string.qr_code_title)) },
                 text = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Image(
-                            bitmap = qrBitmap!!.asImageBitmap(),
-                            contentDescription = null,
-                            modifier = Modifier.size(300.dp)
+                        qrBitmap?.let {
+                            Image(
+                                bitmap = it.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier.size(300.dp)
+                            )
+                        }
+                        OutlinedTextField(
+                            value = qrFooterText,
+                            onValueChange = { qrFooterText = it },
+                            label = { Text(stringResource(R.string.qr_footer_label)) },
+                            modifier = Modifier.padding(top = 16.dp)
                         )
                     }
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        val selection = VerseSelection(
-                            volumeSlug = volume!!.slug,
-                            bookSlug = book!!.slug,
-                            chapterNumber = chapterNumber,
-                            selectedVerses = selectedVerses
-                        )
-                        val fileName = "Versal_${book!!.name}_${chapterNumber}_${selection.formatSelectedVerses().replace(":", "_").replace("-", "_").replace(",", "_")}"
-                        val uri = QrCodeUtils.saveBitmapToGallery(context, qrBitmap!!, fileName)
+                        val fileName = "Versal_${book.name}_${chapterNumber}_${selection.formatSelectedVerses().replace(":", "_").replace("-", "_").replace(",", "_")}"
+                        val uri = qrBitmap?.let { QrCodeUtils.saveBitmapToGallery(context, it, fileName) }
                         if (uri != null) {
                             Toast.makeText(context, R.string.qr_code_saved, Toast.LENGTH_SHORT).show()
                         } else {

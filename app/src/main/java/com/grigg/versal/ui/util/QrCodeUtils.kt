@@ -5,47 +5,105 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.StaticLayout
+import android.text.TextPaint
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import java.io.OutputStream
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
+import androidx.core.graphics.withTranslation
 
 object QrCodeUtils {
-    fun generateQrCodeWithText(title: String, url: String, size: Int = 512): Bitmap {
+    fun generateQrCodeWithText(
+        title: String,
+        url: String,
+        footer: String? = null,
+        size: Int = 512
+    ): Bitmap {
         val writer = QRCodeWriter()
         val bitMatrix = writer.encode(url, BarcodeFormat.QR_CODE, size, size)
-        val qrBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        
+        val qrBitmap = createBitmap(size, size)
+
         for (x in 0 until size) {
             for (y in 0 until size) {
-                qrBitmap.setPixel(x, y, if (bitMatrix.get(x, y)) Color.BLACK else Color.WHITE)
+                qrBitmap[x, y] = if (bitMatrix.get(x, y)) Color.BLACK else Color.WHITE
             }
         }
 
-        // Add text above QR code
-        val textPaint = Paint().apply {
+        val padding = size / 10
+        val maxWidth = size.toFloat()
+
+        // Title Paint
+        val titlePaint = TextPaint().apply {
             color = Color.BLACK
-            textSize = size / 10f
+            textSize = size / 12f
             isAntiAlias = true
-            textAlign = Paint.Align.CENTER
         }
 
-        val textBounds = android.graphics.Rect()
-        textPaint.getTextBounds(title, 0, title.length, textBounds)
-        val textHeight = textBounds.height()
-        val padding = size / 10
-        val totalHeight = size + textHeight + padding * 3
+        // Title Layout
+        val titleLayout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            StaticLayout.Builder.obtain(title, 0, title.length, titlePaint, maxWidth.toInt())
+                .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER)
+                .build()
+        } else {
+            @Suppress("DEPRECATION")
+            StaticLayout(
+                title, titlePaint, maxWidth.toInt(),
+                android.text.Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false
+            )
+        }
 
-        val finalBitmap = Bitmap.createBitmap(size + padding * 2, totalHeight, Bitmap.Config.ARGB_8888)
+        // Footer Layout
+        val footerLayout = if (!footer.isNullOrBlank()) {
+            val footerPaint = TextPaint().apply {
+                color = Color.BLACK
+                textSize = size / 18f
+                isAntiAlias = true
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                StaticLayout.Builder.obtain(footer, 0, footer.length, footerPaint, maxWidth.toInt())
+                    .setAlignment(android.text.Layout.Alignment.ALIGN_CENTER)
+                    .build()
+            } else {
+                @Suppress("DEPRECATION")
+                StaticLayout(
+                    footer, footerPaint, maxWidth.toInt(),
+                    android.text.Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false
+                )
+            }
+        } else {
+            null
+        }
+
+        val titleHeight = titleLayout.height
+        val footerHeight = footerLayout?.height ?: 0
+        val totalHeight = padding + titleHeight + padding + size + padding + footerHeight + padding
+
+        val finalBitmap = createBitmap(size + padding * 2, totalHeight)
         val canvas = Canvas(finalBitmap)
         canvas.drawColor(Color.WHITE)
 
-        canvas.drawText(title, (size + padding * 2) / 2f, padding + textHeight.toFloat(), textPaint)
-        canvas.drawBitmap(qrBitmap, padding.toFloat(), (padding * 2f + textHeight).toFloat(), null)
+        // Draw Title
+        canvas.withTranslation(padding.toFloat(), padding.toFloat()) {
+            titleLayout.draw(this)
+        }
+
+        // Draw QR
+        val qrTop = padding + titleHeight + padding
+        canvas.drawBitmap(qrBitmap, padding.toFloat(), qrTop.toFloat(), null)
+
+        // Draw Footer
+        if (footerLayout != null) {
+            val footerTop = qrTop + size + padding
+            canvas.withTranslation(padding.toFloat(), footerTop.toFloat()) {
+                footerLayout.draw(this)
+            }
+        }
 
         return finalBitmap
     }
