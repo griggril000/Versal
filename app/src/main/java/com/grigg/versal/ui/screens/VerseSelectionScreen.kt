@@ -1,8 +1,12 @@
 package com.grigg.versal.ui.screens
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -18,7 +23,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
@@ -46,6 +55,7 @@ import androidx.window.core.layout.WindowSizeClass
 import com.grigg.versal.R
 import com.grigg.versal.data.ScriptureRepository
 import com.grigg.versal.model.VerseSelection
+import com.grigg.versal.ui.util.QrCodeUtils
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -64,6 +74,8 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
     val baseTitle = stringResource(R.string.book_chapter_format, book?.name ?: "", chapterNumber)
     var selectedVerses by remember { mutableStateOf(setOf<Int>()) }
     var displayedTitle by remember { mutableStateOf(baseTitle) }
+    var showQrDialog by remember { mutableStateOf(false) }
+    var qrBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffect(selectedVerses) {
         if (selectedVerses.isEmpty()) {
@@ -123,11 +135,66 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
                         }) {
                             Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_link))
                         }
+                        IconButton(onClick = {
+                            val selection = VerseSelection(
+                                volumeSlug = volume.slug,
+                                bookSlug = book.slug,
+                                chapterNumber = chapterNumber,
+                                selectedVerses = selectedVerses
+                            )
+                            val link = selection.generateLink()
+                            val verseString = selection.formatSelectedVerses()
+                            val title = "${book.name} $chapterNumber:$verseString"
+                            qrBitmap = QrCodeUtils.generateQrCodeWithText(title, link)
+                            showQrDialog = true
+                        }) {
+                            Icon(Icons.Default.QrCode, contentDescription = stringResource(R.string.generate_qr_code))
+                        }
                     }
                 }
             )
         }
     ) { paddingValues ->
+        if (showQrDialog && qrBitmap != null) {
+            AlertDialog(
+                onDismissRequest = { showQrDialog = false },
+                title = { Text(stringResource(R.string.qr_code_title)) },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Image(
+                            bitmap = qrBitmap!!.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier.size(300.dp)
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val selection = VerseSelection(
+                            volumeSlug = volume!!.slug,
+                            bookSlug = book!!.slug,
+                            chapterNumber = chapterNumber,
+                            selectedVerses = selectedVerses
+                        )
+                        val fileName = "Versal_${book!!.name}_${chapterNumber}_${selection.formatSelectedVerses().replace(":", "_").replace("-", "_").replace(",", "_")}"
+                        val uri = QrCodeUtils.saveBitmapToGallery(context, qrBitmap!!, fileName)
+                        if (uri != null) {
+                            Toast.makeText(context, R.string.qr_code_saved, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, R.string.error_saving_qr_code, Toast.LENGTH_SHORT).show()
+                        }
+                        showQrDialog = false
+                    }) {
+                        Text(stringResource(R.string.save_to_gallery))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showQrDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
         if (chapter != null) {
             val layoutDirection = LocalLayoutDirection.current
             Box(

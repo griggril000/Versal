@@ -45,6 +45,11 @@
     <string name="clear_selection">Clear Selection</string>
     <string name="open_link">Open Link</string>
     <string name="share_link">Share Link</string>
+    <string name="generate_qr_code">Generate QR Code</string>
+    <string name="save_to_gallery">Save to Gallery</string>
+    <string name="qr_code_saved">QR code saved to gallery</string>
+    <string name="error_saving_qr_code">Error saving QR code</string>
+    <string name="qr_code_title">QR Code</string>
 
     <!-- Formats -->
     <string name="chapter_number_format">Chapter %1$d</string>
