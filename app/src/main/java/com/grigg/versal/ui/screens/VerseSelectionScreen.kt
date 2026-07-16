@@ -8,13 +8,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Share
@@ -160,6 +165,8 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
             val verseString = remember(selection) { selection.formatSelectedVerses() }
             val title = "${book.name} $chapterNumber:$verseString"
 
+            var isAddingFooter by remember { mutableStateOf(qrFooterText.isNotEmpty()) }
+
             LaunchedEffect(qrFooterText, selection) {
                 qrBitmap = QrCodeUtils.generateQrCodeWithText(title, link, qrFooterText)
             }
@@ -176,12 +183,25 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
                                 modifier = Modifier.size(300.dp)
                             )
                         }
-                        OutlinedTextField(
-                            value = qrFooterText,
-                            onValueChange = { qrFooterText = it },
-                            label = { Text(stringResource(R.string.qr_footer_label)) },
-                            modifier = Modifier.padding(top = 16.dp)
-                        )
+                        if (isAddingFooter) {
+                            OutlinedTextField(
+                                value = qrFooterText,
+                                onValueChange = { qrFooterText = it },
+                                label = { Text(stringResource(R.string.qr_footer_label)) },
+                                modifier = Modifier
+                                    .padding(top = 16.dp)
+                                    .fillMaxWidth()
+                            )
+                        } else {
+                            TextButton(
+                                onClick = { isAddingFooter = true },
+                                modifier = Modifier.padding(top = 8.dp)
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.add_footer_text))
+                            }
+                        }
                     }
                 },
                 confirmButton = {

@@ -51,6 +51,7 @@
     <string name="error_saving_qr_code">Error saving QR code</string>
     <string name="qr_code_title">QR Code</string>
     <string name="qr_footer_label">Footer text (optional)</string>
+    <string name="add_footer_text">Add footer text</string>
 
     <!-- Formats -->
     <string name="chapter_number_format">Chapter %1$d</string>
