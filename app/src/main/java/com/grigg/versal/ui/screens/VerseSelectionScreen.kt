@@ -28,7 +28,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -164,6 +166,7 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
             val link = remember(selection) { selection.generateLink() }
             val verseString = remember(selection) { selection.formatSelectedVerses() }
             val title = "${book.name} $chapterNumber:$verseString"
+            val shareTitle = stringResource(R.string.share_qr_code)
 
             var isAddingFooter by remember { mutableStateOf(qrFooterText.isNotEmpty()) }
 
@@ -173,7 +176,47 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
 
             AlertDialog(
                 onDismissRequest = { showQrDialog = false },
-                title = { Text(stringResource(R.string.qr_code_title)) },
+                title = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(stringResource(R.string.qr_code_title))
+                        Spacer(Modifier.weight(1f))
+                        IconButton(onClick = {
+                            val fileName = "Versal_${book.name}_${chapterNumber}_${selection.formatSelectedVerses().replace(":", "_").replace("-", "_").replace(",", "_")}"
+                            val uri = qrBitmap?.let { QrCodeUtils.saveBitmapToGallery(context, it, fileName) }
+                            if (uri != null) {
+                                Toast.makeText(context, R.string.qr_code_saved, Toast.LENGTH_SHORT).show()
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "image/png"
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                context.startActivity(Intent.createChooser(intent, shareTitle))
+                            } else {
+                                Toast.makeText(context, R.string.error_saving_qr_code, Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
+                            Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_qr_code))
+                        }
+                        IconButton(onClick = {
+                            val fileName = "Versal_${book.name}_${chapterNumber}_${selection.formatSelectedVerses().replace(":", "_").replace("-", "_").replace(",", "_")}"
+                            val uri = qrBitmap?.let { QrCodeUtils.saveBitmapToGallery(context, it, fileName) }
+                            if (uri != null) {
+                                Toast.makeText(context, R.string.qr_code_saved, Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, R.string.error_saving_qr_code, Toast.LENGTH_SHORT).show()
+                            }
+                            showQrDialog = false
+                        }) {
+                            Icon(Icons.Default.Save, contentDescription = stringResource(R.string.save_to_gallery))
+                        }
+                        IconButton(onClick = { showQrDialog = false }) {
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel))
+                        }
+                    }
+                },
                 text = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         qrBitmap?.let {
@@ -204,25 +247,8 @@ fun VerseSelectionScreen(volumeId: String, bookId: String, chapterNumber: Int, o
                         }
                     }
                 },
-                confirmButton = {
-                    TextButton(onClick = {
-                        val fileName = "Versal_${book.name}_${chapterNumber}_${selection.formatSelectedVerses().replace(":", "_").replace("-", "_").replace(",", "_")}"
-                        val uri = qrBitmap?.let { QrCodeUtils.saveBitmapToGallery(context, it, fileName) }
-                        if (uri != null) {
-                            Toast.makeText(context, R.string.qr_code_saved, Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, R.string.error_saving_qr_code, Toast.LENGTH_SHORT).show()
-                        }
-                        showQrDialog = false
-                    }) {
-                        Text(stringResource(R.string.save_to_gallery))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showQrDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
+                confirmButton = {},
+                dismissButton = {}
             )
         }
         if (chapter != null) {
